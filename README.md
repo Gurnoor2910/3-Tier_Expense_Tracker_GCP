@@ -40,7 +40,7 @@ graph TD
 
     A[User Browser] -->|HTTP Requests| B[Frontend - HTML/CSS/JS]
 
-    B -->|Form Submission / API Calls| C[Flask Backend]
+    B -->|Form Submission| C[Flask Backend]
 
     C -->|ORM Queries| D[SQLAlchemy]
 
