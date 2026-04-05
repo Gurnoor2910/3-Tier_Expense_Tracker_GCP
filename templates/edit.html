@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Expense - Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="{{ theme }}">
+  <div class="wrap">
+    <aside class="side" aria-hidden="false">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="meta">
+          <b>Expense Tracker</b>
+          <div class="sub">Pixel-perfect UI</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="{{ url_for('index') }}">Dashboard</a>
+        <a href="#">All Expenses</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+      </nav>
+    </aside>
+    <div style="display:grid; grid-template-rows:auto 1fr; min-height:100dvh;">
+      <header class="head">
+        <div class="inner">
+          <button class="btn" onclick="window.location.href='{{ url_for('index') }}'">← Back</button>
+          <h2>Edit Expense</h2>
+        </div>
+      </header>
+      <main class="main">
+        <section class="card panel">
+          <div class="panel-head"><h3>Edit Expense</h3></div>
+          <div class="panel-body">
+            <form method="POST" action="{{ url_for('edit', id=expense.id) }}" class="form-grid">
+              <div class="input">
+                <label for="date">Date</label>
+                <input type="date" name="date" id="date" value="{{ expense.date }}" required />
+              </div>
+              <div class="input">
+                <label for="amount">Amount</label>
+                <input type="number" name="amount" id="amount" min="0" step="0.01" value="{{ expense.amount }}" required />
+              </div>
+              <div class="input">
+                <label for="description">Description</label>
+                <input type="text" name="description" id="description" value="{{ expense.description }}" required />
+              </div>
+              <div class="input">
+                <label for="category">Category</label>
+                <select name="category" id="category" required>
+                  {% for cat in ['Food', 'Transport', 'Bills', 'Entertainment', 'Shopping', 'Health', 'Other'] %}
+                  <option value="{{ cat }}" {% if expense.category == cat %}selected{% endif %}>{{ cat }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="input" style="grid-column: 1 / -1;">
+                <label for="notes">Notes</label>
+                <textarea name="notes" id="notes" placeholder="Optional notes">{{ expense.notes }}</textarea>
+              </div>
+              <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+                <button type="submit" class="btn">Update</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

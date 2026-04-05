@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard - Expense Tracker</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="{{ theme }}">
+  <div class="wrap">
+    <aside class="side" aria-hidden="false">
+      <div class="brand">
+        <div class="logo"></div>
+        <div class="meta">
+          <b>Expense Tracker</b>
+          <div class="sub">Pixel-perfect UI</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="{{ url_for('index') }}">Dashboard</a>
+        <a href="#">All Expenses</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+      </nav>
+    </aside>
+    <div style="display:grid; grid-template-rows:auto 1fr; min-height:100dvh;">
+      <header class="head">
+        <div class="inner">
+          <h2>Dashboard</h2>
+        </div>
+      </header>
+      <main class="main" aria-label="Dashboard main content">
+        <div>
+          <p>Use this page to add reports or analytics later.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

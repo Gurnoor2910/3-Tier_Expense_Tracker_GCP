@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Expense Tracker — Pixel Perfect (Theme Toggle)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="{{ theme }}">
+  <div class="wrap">
+    <aside class="side" aria-hidden="false">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="meta">
+          <b>Expense Tracker</b>
+          <div class="sub">Pixel-perfect UI</div>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Main navigation">
+        <a class="active" href="#dashboard">Dashboard</a>
+        <a href="#expenses">All Expenses</a>
+        <a href="#reports">Reports</a>
+        <a href="#settings">Settings</a>
+      </nav>
+    </aside>
+    <div style="display:grid; grid-template-rows:auto 1fr; min-height:100dvh;">
+      <header class="head">
+        <div class="inner">
+          <div class="search" role="search" aria-label="Search expenses">
+            <span>🔎</span>
+            <input id="search" placeholder="Search description or notes…" />
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="exportBtn" title="Export expenses">Export</button>
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-pressed="false" aria-label="Toggle theme">🌙</button>
+            <button class="btn" id="addBtn">+ Add Expense</button>
+          </div>
+        </div>
+      </header>
+      <main class="main" id="dashboard">
+        <div class="stats">
+          <div class="card card-pad stat"><div class="muted">Total Spent</div><b id="totalSpent">{{ total_spent or '₹0' }}</b></div>
+          <div class="card card-pad stat"><div class="muted">This Month</div><b id="this_month">{{ this_month or '₹0' }}</b></div>
+          <div class="card card-pad stat"><div class="muted">Biggest Category</div><b id="topCat">{{ biggest_category or '—' }}</b></div>
+        </div>
+        <div style="height:14px;"></div>
+        <section class="card panel" id="tablePanel" aria-labelledby="tablePanel">
+          <div class="panel-head">
+            <div class="filters" role="toolbar" aria-label="Filters">
+              <div class="field"><span>📅</span><input type="date" id="fromDate" /></div>
+              <div class="field"><span>➡️</span><input type="date" id="toDate" /></div>
+              <div class="field"><span>🏷️</span>
+                <select id="filterCategory">
+                  <option value="">All categories</option>
+                  {% for cat in ['Food', 'Transport', 'Bills', 'Entertainment', 'Shopping', 'Health', 'Other'] %}
+                  <option>{{ cat }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="field"><span>💱</span>
+                <select id="currency"><option value="INR" selected>INR ₹</option><option value="USD">USD $</option></select>
+              </div>
+            </div>
+            <div class="row">
+              <button class="icon-btn" id="importBtn" title="Import JSON">⬆️</button>
+              <button class="icon-btn" id="clearBtn" title="Clear all">🗑️</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <table id="tbl" aria-live="polite">
+              <thead>
+                <tr>
+                  <th data-sort="date" scope="col">Date</th>
+                  <th scope="col">Description</th>
+                  <th data-sort="amount" scope="col">Amount</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Notes</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for expense in expenses %}
+                <tr>
+                  <td>{{ expense.date }}</td>
+                  <td>{{ expense.description }}</td>
+                  <td>₹{{ "{:.2f}".format(expense.amount) }}</td>
+                  <td>{{ expense.category }}</td>
+                  <td>{{ expense.notes or "" }}</td>
+                  <td class="actions">
+                    <a href="{{ url_for('edit', id=expense.id) }}" class="icon-btn" title="Edit">✏️</a>
+                    <form method="POST" action="{{ url_for('delete', id=expense.id) }}" style="display:inline;">
+                      <button type="submit" class="icon-btn danger" title="Delete">🗑️</button>
+                    </form>
+                  </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" style="text-align:center;">No expenses found.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <div style="height:14px;"></div>
+        <section class="grid-2" aria-label="Reports">
+          <div class="card card-pad">
+            <canvas id="pie" height="220" aria-label="Category breakdown chart" role="img"></canvas>
+          </div>
+          <div class="card card-pad">
+            <h3 style="margin:0 0 8px">Category Summary</h3>
+            <div id="summary"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-label="Add expense">
+    <div class="d-head">
+      <b id="drawerTitle">Add Expense</b>
+      <button class="icon-btn" id="closeDrawer" aria-label="Close">✖</button>
+    </div>
+    <div class="d-body">
+      <form id="expForm" class="form-grid" method="POST" action="{{ url_for('add') }}">
+        <div class="input">
+          <label for="f_date">Date</label>
+          <input type="date" id="f_date" name="date" required />
+        </div>
+        <div class="input">
+          <label for="f_amount">Amount</label>
+          <input type="number" id="f_amount" name="amount" min="0" step="0.01" placeholder="0.00" required />
+        </div>
+        <div class="input">
+          <label for="f_desc">Description</label>
+          <input type="text" id="f_desc" name="description" placeholder="e.g., Lunch with friends" required />
+        </div>
+        <div class="input">
+          <label for="f_cat">Category</label>
+          <select id="f_cat" name="category" required>
+            {% for cat in ['Food', 'Transport', 'Bills', 'Entertainment', 'Shopping', 'Health', 'Other'] %}
+            <option>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="input" style="grid-column: 1 / -1;">
+          <label for="f_notes">Notes</label>
+          <textarea id="f_notes" name="notes" placeholder="Optional notes"></textarea>
+        </div>
+        <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+          <button type="reset" class="btn ghost" id="resetForm">Reset</button>
+          <button type="submit" class="btn" id="submitBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+  <div class="toast" id="toast" role="status" aria-live="polite">Saved ✔</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const chartLabels = {{ labels | tojson }};
+    const chartData = {{ data | tojson }};
+    const ctx = document.getElementById('pie').getContext('2d');
+    const pieChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: chartLabels,
+        datasets: [{
+          data: chartData,
+          backgroundColor: ['#2bd4c7','#5a7bff','#101050','#202030','#001010','#36d1dc','#5b86e5'],
+          borderColor: 'rgba(0,0,0,0)'
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--ink-0').trim() || '#e8eef8'
+            }
+          }
+        }
+      }
+    });
+    const summaryDiv = document.getElementById('summary');
+    summaryDiv.innerHTML = '';
+    for(let i = 0; i < chartLabels.length; i++) {
+      summaryDiv.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px 0;"><span class="muted">${chartLabels[i]}</span><b>₹${chartData[i].toFixed(2)}</b></div>`;
+    }
+  </script>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
