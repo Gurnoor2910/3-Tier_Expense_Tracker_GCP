@@ -42,9 +42,7 @@ graph TD
 
     B -->|Form Submission| C[Flask Backend]
 
-    C -->|ORM Queries| 
-
-    D -->|SQL Queries| E[MySQL Database]
+    C -->|Direct SQL Queries| E[MySQL Database]
 
     C -->|Render Templates| B
 
@@ -55,7 +53,6 @@ graph TD
 
     subgraph Application Layer
         C
-        D
     end
 
     subgraph Data Layer
