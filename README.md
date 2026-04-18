@@ -112,8 +112,7 @@ The application will start on:
 
 ## Dependencies
 
-- Flask  
-- Flask-SQLAlchemy  
+- Flask   
 - PyMySQL  
 - Gunicorn  
 
