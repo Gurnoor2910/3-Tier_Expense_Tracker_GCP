@@ -42,7 +42,7 @@ graph TD
 
     B -->|Form Submission| C[Flask Backend]
 
-    C -->|ORM Queries| D[SQLAlchemy]
+    C -->|ORM Queries| 
 
     D -->|SQL Queries| E[MySQL Database]
 
